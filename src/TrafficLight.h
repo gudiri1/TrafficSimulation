@@ -5,12 +5,13 @@
 #include <deque>
 #include <condition_variable>
 #include "TrafficObject.h"
+#include <new>
 
 // forward declarations to avoid include cycle
 class Vehicle;
 
 
-enum TraphicLightPhase {red, green};
+enum TrafficLightPhase {red, green};
 
 
 
@@ -23,8 +24,13 @@ template <class T>
 class MessageQueue
 {
 public:
+    void send(T &&phase);   // void send(TrafficLightPhase &&phase);
+    T receive();               // TrafficLightPhase receive();
 
 private:
+    std::deque<T> _queue;
+    std::mutex _mutex;
+    std::condition_variable _cond;
     
 };
 
@@ -42,13 +48,14 @@ public:
 
 
     // constructor / desctructor
+    TrafficLight();
 
     // getters / setters
 
     // typical behaviour methods
     void waitForGreen();
     void simulate();
-    //TrafficLightPhase getCurrentPhase();
+    TrafficLightPhase getCurrentPhase();
 
 private:
     // typical behaviour methods
@@ -58,9 +65,13 @@ private:
     // and use it within the infinite loop to push each new TrafficLightPhase into it by calling 
     // send in conjunction with move semantics.
 
+    //std::shared_ptr<MessageQueue<TrafficLightPhase>> quee(new MessageQueue<TrafficLightPhase>);
+
+    MessageQueue<TrafficLightPhase> _Mqueue;
+
     std::condition_variable _condition;
     std::mutex _mutex;
-    TraphicLightPhase _currentPhase;
+    TrafficLightPhase _currentPhase;
 };
 
 #endif
